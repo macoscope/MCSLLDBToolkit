@@ -13,11 +13,6 @@ from mcslldb_helpers import get_variable, lldb_command
 
 
 @lldb_command
-def uppercase(debugger, *args):
-    return '\n'.join(x.upper() for x in args)
-
-
-@lldb_command
 def json(debugger, variable_name):
     # get JSON string
     variable = get_variable(debugger, variable_name)
