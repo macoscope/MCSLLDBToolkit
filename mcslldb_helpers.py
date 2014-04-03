@@ -9,10 +9,30 @@ import sys
 LLDB_COMMANDS = []
 
 
+class CommandException(Exception):
+    pass
+
+
 class DummyDebugger(object):
 
     def HandleCommand(self, s):
         print s
+
+
+def get_variable(debugger, variable_name):
+    target = debugger.GetSelectedTarget()
+    process = target.GetProcess()
+    thread = process.GetSelectedThread()
+    frame = thread.GetSelectedFrame()
+    variable_map = frame.GetVariables(True, True, True, False)
+
+    try:
+        variable = variable_map[variable_name][0]
+    except IndexError:
+        raise CommandException('ERROR: variable "%s" not found' % \
+                               variable_name)
+
+    return variable
 
 
 def lldb_command(function):
@@ -37,7 +57,10 @@ def lldb_command(function):
     @wraps(function)
     def wrapper(debugger, argument_string, result_file, internal_dict):
         args = shlex.split(argument_string)
-        result = function(debugger, *args)
+        try:
+            result = function(debugger, *args)
+        except CommandException as exception:
+            result = exception.message
 
         if result:
             result_file.write(result)
