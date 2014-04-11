@@ -9,14 +9,14 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import JavascriptLexer
 
-from mcslldb_helpers import get_variable, lldb_command
+from mcslldb_helpers import get_value, lldb_command
 
 
 @lldb_command
-def json(debugger, variable_name):
+def json(debugger, expression):
     # get JSON string
-    variable = get_variable(debugger, variable_name)
-    json_string = variable.GetObjectDescription()
+    value = get_value(debugger, expression)
+    json_string = value.GetObjectDescription()
 
     # prettify JSON
     pretty_json_string = json_lib.dumps(json_lib.loads(json_string),

@@ -19,20 +19,18 @@ class DummyDebugger(object):
         print s
 
 
-def get_variable(debugger, variable_name):
+def get_value(debugger, expression):
     target = debugger.GetSelectedTarget()
     process = target.GetProcess()
     thread = process.GetSelectedThread()
     frame = thread.GetSelectedFrame()
-    variable_map = frame.GetVariables(True, True, True, False)
+    value = frame.EvaluateExpression(expression)
 
-    try:
-        variable = variable_map[variable_name][0]
-    except IndexError:
-        raise CommandException('ERROR: variable "%s" not found' % \
-                               variable_name)
+    error_message = str(value.GetError())
+    if error_message != 'success':
+        raise CommandException(error_message)
 
-    return variable
+    return value
 
 
 def lldb_command(function):
