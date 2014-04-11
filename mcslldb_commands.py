@@ -14,6 +14,17 @@ from mcslldb_helpers import get_value, lldb_command
 
 @lldb_command
 def json(debugger, expression):
+    # change NSData to NSString
+    expression = """
+        [{x} isKindOfClass:[NSData class]] ?
+            (NSString *)[[NSString alloc] initWithData:{x} encoding:{e}] :
+            {x}
+    """.strip().format(**{
+        'x': expression,
+        'e': 4,  # 4 is NSUTF8StringEncoding -- it's defined in NSString.h,
+                 # which LLDB can't access
+    })
+
     # get JSON string
     value = get_value(debugger, expression)
     json_string = value.GetObjectDescription()
